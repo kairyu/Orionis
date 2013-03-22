@@ -1,3 +1,5 @@
+// Orionis/Alnilam
+
 #include <EEPROM.h>
 #include <TinyWireS.h>
 
@@ -33,35 +35,11 @@ unsigned char state = 0;
 unsigned char mode = MODE_KEYDOWN;
 unsigned char brightness = 255;
 
-void setup() {
-  pinMode(KEY_PIN, INPUT_PULLUP);
-  pinMode(LED_PIN, OUTPUT);
-  
-  // I2C
-  addr = EEPROM.read(EEPROM_I2CADDR);
-  TinyWireS.begin(addr);
-  TinyWireS.onReceive(receiveEvent);
-  TinyWireS.onRequest(requestEvent);
-
-  // PWM
-  TCCR1 = (0<<COM1A1)|(0<<COM1A0)|(0<<PWM1A)|(1<<CS10);
-  GTCCR = (1<<PWM1B)|(1<<COM0B1)|(0<<COM0B0);
-  
-  pinMode(ATTN_PIN, OUTPUT);
-  digitalWrite(ATTN_PIN, HIGH);
-}
-
-void loop() {
-  key = 1 - digitalRead(KEY_PIN);
-  if (mode == MODE_KEYDOWN) {
-    if (key) {
-      OCR1B = brightness;
-    }
-    else {
-      OCR1B = 0;
-    }
-  }
-}
+void receiveEvent(uint8_t howMany);
+void requestEvent();
+void setMode(unsigned char m);
+void setAddr(unsigned char a);
+void setBrightness(unsigned char b);
 
 void receiveEvent(uint8_t howMany) {
   if (howMany < 1) {
@@ -133,3 +111,34 @@ void setBrightness(unsigned char b) {
       break;
   }
 }
+
+void setup() {
+  pinMode(KEY_PIN, INPUT_PULLUP);
+  pinMode(LED_PIN, OUTPUT);
+  
+  // I2C
+  addr = EEPROM.read(EEPROM_I2CADDR);
+  TinyWireS.begin(addr);
+  TinyWireS.onReceive(receiveEvent);
+  TinyWireS.onRequest(requestEvent);
+
+  // PWM
+  TCCR1 = (0<<COM1A1)|(0<<COM1A0)|(0<<PWM1A)|(1<<CS10);
+  GTCCR = (1<<PWM1B)|(1<<COM0B1)|(0<<COM0B0);
+  
+  pinMode(ATTN_PIN, OUTPUT);
+  digitalWrite(ATTN_PIN, HIGH);
+}
+
+void loop() {
+  key = 1 - digitalRead(KEY_PIN);
+  if (mode == MODE_KEYDOWN) {
+    if (key) {
+      OCR1B = brightness;
+    }
+    else {
+      OCR1B = 0;
+    }
+  }
+}
+
