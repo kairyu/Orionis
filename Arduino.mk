@@ -308,7 +308,9 @@ AVR_TOOLS_PATH    = $(AVR_TOOLS_DIR)/bin
 endif
 
 ARDUINO_LIB_PATH  = $(ARDUINO_DIR)/libraries
+ifndef ARDUINO_CORE_PATH
 ARDUINO_CORE_PATH = $(ARDUINO_DIR)/hardware/arduino/cores/arduino
+endif
 ARDUINO_VAR_PATH  = $(ARDUINO_DIR)/hardware/arduino/variants
 
 else
@@ -643,7 +645,13 @@ ifdef AVRDUDE_CONF
 AVRDUDE_COM_OPTS += -C $(AVRDUDE_CONF)
 endif
 
+OS = $(shell uname)
+ifeq ($(findstring CYGWIN,$(OS)),CYGWIN)
+ARD_PORT_CYGWIN = $(subst \\?\,,$(shell cygpath -w $(ARD_PORT)))
+AVRDUDE_ARD_OPTS = -c $(AVRDUDE_ARD_PROGRAMMER) -b $(AVRDUDE_ARD_BAUDRATE) -P $(ARD_PORT_CYGWIN)
+else
 AVRDUDE_ARD_OPTS = -c $(AVRDUDE_ARD_PROGRAMMER) -b $(AVRDUDE_ARD_BAUDRATE) -P $(ARD_PORT)
+endif
 
 ifndef ISP_PROG
 ISP_PROG	   = -c stk500v2
